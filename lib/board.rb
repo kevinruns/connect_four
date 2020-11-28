@@ -1,13 +1,11 @@
-# encoding: utf-8
-
 # connect four board class
 class Board
   attr_accessor :board
 
   def initialize(dash)
     @board = Array.new(6) { Array.new(7, dash) }
-    @player_one = Player.new("\u2648", "PlayerOne")
-    @player_two = Player.new("\u264C", "PlayerTwo")
+    @player_one = Player.new("\u2648", "Asterisk")
+    @player_two = Player.new("\u264C", "Obelisk")
     @dash = dash
   end
 
@@ -20,7 +18,7 @@ class Board
 
     @board.each_with_index do |_row, i|
       if @board[5 - i][column - 1] == @dash
-        @board[5 - i][column - 1] = player.piece 
+        @board[5 - i][column - 1] = player.piece
         break
       end
     end
@@ -33,12 +31,11 @@ class Board
   def column_space(column)
     space = false
     @board.each_with_index do |_row, i|
-      space = true if @board[i][column - 1 ] == @dash
+      space = true if @board[i][column - 1] == @dash
     end
     space
   end
 
-  
   def show_board
     print "\n\n"
     @board.each_with_index do |_row, i|
@@ -51,13 +48,73 @@ class Board
     print "\n"
   end
 
-  def play_game
+  def check_for_win(piece)
+    diag_array = transform_array_diag(@board)
+    board_diag = @board.each.map { |row| row.reverse }
+    diag_array_reverse  = transform_array_diag(board_diag)
+    check_win(piece, @board) || check_win(piece, @board.transpose) || check_win(piece, diag_array) || check_win(piece, diag_array_reverse)
+  end
 
-    while true do
+  def transform_array_diag(array)
+    diag_array = []
+    k = 0
+    height = array.length
+    width = array[0].length
+    (0..height - 1).each do |i|
+      (0..width - 1).each do |j|
+        diag_array[k] ? diag_array[k].push(array[i][j]) : diag_array[k] = [array[i][j]]
+        k += 1
+      end
+      k = k - width + 1
+    end
+    diag_array.filter { |diag| diag.length > 3 }
+  end
+
+  def check_win(piece, array)
+    row_win = false
+    height = array.length
+#    p array
+    catch :take_me_out do
+      (0..height - 1).each do |i|
+        width = array[i].length
+        (0..width - 4).each do |j|
+          if array[i].slice(j, 4) == ([piece] * 4)
+            row_win = true
+          # else
+          #   print "i #{i}, j #{j} \n"
+          #   p array[i].slice(j, 4)
+          #   p([piece] * 4)
+          end
+          throw :take_me_out if row_win == true
+        end
+      end
+    end
+    row_win
+  end
+
+  def board_full
+    not @board.any? { |row| row.include?(@dash) }
+  end
+
+  def play_game
+    player = @player_one
+    until check_for_win(player.piece) || board_full do
       player = player == @player_one ? @player_two : @player_one
       show_board
       write_column(player)
     end
-  end
 
+    str = "GAME OVER: "
+    if check_for_win(player.piece)
+      str = str + "#{player.name} wins"
+    else
+      str = str + "Board full"
+    end
+
+    print "\n***************************************************************************\n"
+    print "  #{str}\n"
+    print "***************************************************************************\n"
+
+    show_board
+  end
 end

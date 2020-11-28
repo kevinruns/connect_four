@@ -1,6 +1,6 @@
 # connect four player class
 class Player
-  attr_reader :piece
+  attr_reader :piece, :name
 
   def initialize(code, player_name)
     @piece = code
@@ -12,6 +12,6 @@ class Player
   end
 
   def prompt_player
-    print "Enter column 1-7 : "
+    print "#{@name} enter column 1-7 : "
   end
 end
