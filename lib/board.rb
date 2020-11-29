@@ -50,8 +50,8 @@ class Board
 
   def check_for_win(piece)
     diag_array = transform_array_diag(@board)
-    board_diag = @board.each.map { |row| row.reverse }
-    diag_array_reverse  = transform_array_diag(board_diag)
+    board_diag = @board.each.map(&:reverse)
+    diag_array_reverse = transform_array_diag(board_diag)
     check_win(piece, @board) || check_win(piece, @board.transpose) || check_win(piece, diag_array) || check_win(piece, diag_array_reverse)
   end
 
@@ -73,18 +73,12 @@ class Board
   def check_win(piece, array)
     row_win = false
     height = array.length
-#    p array
+
     catch :take_me_out do
       (0..height - 1).each do |i|
         width = array[i].length
         (0..width - 4).each do |j|
-          if array[i].slice(j, 4) == ([piece] * 4)
-            row_win = true
-          # else
-          #   print "i #{i}, j #{j} \n"
-          #   p array[i].slice(j, 4)
-          #   p([piece] * 4)
-          end
+          row_win = true if array[i].slice(j, 4) == ([piece] * 4)
           throw :take_me_out if row_win == true
         end
       end
@@ -93,23 +87,23 @@ class Board
   end
 
   def board_full
-    not @board.any? { |row| row.include?(@dash) }
+    !@board.any? { |row| row.include?(@dash) }
   end
 
   def play_game
     player = @player_one
-    until check_for_win(player.piece) || board_full do
+    until check_for_win(player.piece) || board_full
       player = player == @player_one ? @player_two : @player_one
       show_board
       write_column(player)
     end
 
     str = "GAME OVER: "
-    if check_for_win(player.piece)
-      str = str + "#{player.name} wins"
-    else
-      str = str + "Board full"
-    end
+    str = if check_for_win(player.piece)
+            str + "#{player.name} wins"
+          else
+            str + "Board full"
+          end
 
     print "\n***************************************************************************\n"
     print "  #{str}\n"
