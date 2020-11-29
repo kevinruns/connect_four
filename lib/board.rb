@@ -67,7 +67,7 @@ class Board
       end
       k = k - width + 1
     end
-    diag_array.filter { |diag| diag.length > 3 }
+    diag_array.select { |diag| diag.length > 3 }
   end
 
   def check_win(piece, array)
